@@ -3,7 +3,8 @@ import plotly.express as px
 import streamlit as st
 
 # Reuse the functions FROM analysis.py (we don't rewrite them)
-from analysis import db_path, get_energy, max_consumption, min_consumption
+from analysis import (db_path, get_energy, max_consumption, min_consumption,
+                      consumption_per_hour, production_consumption_balance)
 
 st.set_page_config(page_title="Energy Dashboard", layout="wide")
 
@@ -89,4 +90,30 @@ by_loc = dff.groupby('location')['cost_usd'].sum().reset_index()
 st.plotly_chart(
     px.pie(by_loc, names='location', values='cost_usd', hole=0.4,
            color_discrete_sequence=px.colors.sequential.Greens[::-1]),
+    use_container_width=True)
+
+st.divider()
+
+# ---------------- Consumption per hour (power rate) ----------------
+st.subheader("Consumption per hour (power rate)")
+st.caption("kWh per hour = how hard each device pulls, not just the total consumed.")
+per_hour = consumption_per_hour(dff)
+fig_ph = px.bar(per_hour.sort_values('kwh_per_hour'),
+                x='kwh_per_hour', y='device', orientation='h',
+                color='kwh_per_hour', color_continuous_scale=GREEN_SEQ)
+fig_ph.update_layout(showlegend=False)
+st.plotly_chart(fig_ph, use_container_width=True)
+
+# ---------------- Production vs consumption balance ----------------
+st.subheader("Production vs consumption balance")
+bal = production_consumption_balance(dff)
+b1, b2, b3 = st.columns(3)
+b1.metric("Produced (kWh)", f"{bal['produced_kwh']:.1f}")
+b2.metric("Consumed (kWh)", f"{bal['consumed_kwh']:.1f}")
+b3.metric("Net (kWh)", f"{bal['net_kwh']:.1f}",
+          delta="surplus" if bal['net_kwh'] >= 0 else "deficit")
+bal_df = pd.DataFrame({"type": ["Produced", "Consumed"],
+                       "kwh": [bal['produced_kwh'], bal['consumed_kwh']]})
+st.plotly_chart(
+    px.bar(bal_df, x="type", y="kwh", color="kwh", color_continuous_scale=GREEN_SEQ),
     use_container_width=True)

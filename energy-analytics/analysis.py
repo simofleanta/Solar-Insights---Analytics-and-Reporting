@@ -30,6 +30,35 @@ def min_consumption(df):
     return row['device']
 
 
+# === CONSUMPTION PER HOUR (power rate) ===
+# kWh / hours = the real power draw, not just the total consumed.
+# A device can have a high total only because it runs many hours (e.g. a fridge);
+# this shows how hard it pulls *per hour*. Returns one row per device, sorted desc.
+# Only real consumers (positive kWh, duration > 0) are considered.
+def consumption_per_hour(df):
+    consumers = df[(df['consumption_kwh'] > 0) & (df['duration_hours'] > 0)].copy()
+    consumers['kwh_per_hour'] = consumers['consumption_kwh'] / consumers['duration_hours']
+    result = (consumers.groupby('device')['kwh_per_hour'].mean()
+              .sort_values(ascending=False).reset_index())
+    return result
+
+
+# === PRODUCTION vs CONSUMPTION BALANCE ===
+# Negative kWh = energy produced (e.g. solar inverter); positive = consumed.
+# Returns total produced, total consumed and the net balance.
+# net < 0  -> we consume more than we produce (we still buy from the grid)
+# net > 0  -> we produce a surplus.
+def production_consumption_balance(df):
+    produced = -df[df['consumption_kwh'] < 0]['consumption_kwh'].sum()  # as a positive number
+    consumed = df[df['consumption_kwh'] > 0]['consumption_kwh'].sum()
+    net = produced - consumed
+    return pd.Series({
+        'produced_kwh': round(produced, 2),
+        'consumed_kwh': round(consumed, 2),
+        'net_kwh': round(net, 2),
+    })
+
+
 if __name__ == "__main__":
     energy_df = get_energy(db_path, "SELECT * FROM energy_consumption")
 
@@ -50,3 +79,11 @@ if __name__ == "__main__":
     print(pivot)
 
     print("Lowest consumer:", min_consumption(energy_df))
+
+    # Consumption per hour (power rate) per device
+    print("\nConsumption per hour (kWh/h):")
+    print(consumption_per_hour(energy_df))
+
+    # Production vs consumption balance
+    print("\nProduction / consumption balance:")
+    print(production_consumption_balance(energy_df))
