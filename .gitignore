@@ -1,0 +1,17 @@
+# Date personale - baza de date Garmin (NU se urca)
+*.sqlite
+*.db
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Credentiale / secrete
+.env
+*.token
+
+# IDE
+.vscode/
+.idea/
