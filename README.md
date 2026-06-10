@@ -1,57 +1,57 @@
 # Solar Insights — Analytics & Reporting
 
-Pipeline de date și raportare pentru intensitatea solară captată de un ceas **Garmin Fenix 6X Pro Solar**.
-Datele sunt descărcate din Garmin Connect, stocate în SQLite și vizualizate în Streamlit și Power BI.
+Data pipeline and reporting for solar intensity captured by a **Garmin Fenix 6X Pro Solar** watch.
+Data is downloaded from Garmin Connect, stored in SQLite, and visualized in Streamlit and Power BI.
 
-## Componente
+## Components
 
-| Fișier | Rol |
+| File | Purpose |
 |---|---|
-| `garmin_solar_to_sqlite.py` | Descarcă intensitatea solară zilnică din Garmin Connect → SQLite (idempotent) |
-| `app.py` | Dashboard Streamlit (trend zilnic, KPI-uri, medie pe zi din săptămână) |
-| `script_power_bi.py` | Script pentru conectorul Python din Power BI (returnează `solar_daily`) |
-| `requirements.txt` | Dependențe Python |
+| `garmin_solar_to_sqlite.py` | Downloads daily solar intensity from Garmin Connect → SQLite (idempotent) |
+| `app.py` | Streamlit dashboard (daily trend, KPIs, average by weekday) |
+| `script_power_bi.py` | Script for the Power BI Python connector (returns `solar_daily`) |
+| `requirements.txt` | Python dependencies |
 
-## Schema datelor (SQLite)
+## Data schema (SQLite)
 
-**`solar_intensity_daily`** — un rând pe zi:
+**`solar_intensity_daily`** — one row per day:
 
-| coloană | descriere |
+| Column | Description |
 |---|---|
-| `day` | data (YYYY-MM-DD) |
-| `avg_intensity` | media zilnică a intensității solare (%) |
-| `max_intensity` | vârful zilnic (%) |
-| `sample_count` | număr de citiri din zi (~1440 = zi completă) — indicator de încredere |
-| `device_id` | id-ul ceasului |
+| `day` | Date (YYYY-MM-DD) |
+| `avg_intensity` | Daily average solar intensity (%) |
+| `max_intensity` | Daily peak (%) |
+| `sample_count` | Number of readings in the day (~1440 = full day) — confidence indicator |
+| `device_id` | Watch device id |
 
-## Utilizare
+## Usage
 
-### 1. Configurare credențiale (o singură dată)
+### 1. Configure credentials (once)
 ```powershell
-setx GARMIN_EMAIL "email_garmin"
-setx GARMIN_PASSWORD "parola_garmin"
+setx GARMIN_EMAIL "your_garmin_email"
+setx GARMIN_PASSWORD "your_garmin_password"
 ```
 
-### 2. Instalare dependențe
+### 2. Install dependencies
 ```powershell
 pip install -r requirements.txt
 ```
 
-### 3. Descărcare date
+### 3. Download data
 ```powershell
-python garmin_solar_to_sqlite.py                 # ultimele 30 de zile
-python garmin_solar_to_sqlite.py 2026-05-01 2026-06-09   # interval specific
+python garmin_solar_to_sqlite.py                         # last 30 days
+python garmin_solar_to_sqlite.py 2026-05-01 2026-06-09   # specific range
 ```
 
-### 4. Dashboard Streamlit
+### 4. Streamlit dashboard
 ```powershell
 streamlit run app.py
 ```
 
 ### 5. Power BI
-**Get Data → Python script** → lipești conținutul din `script_power_bi.py` → în Navigator bifezi `solar_daily` → **Load**.
+**Get Data → Python script** → paste the contents of `script_power_bi.py` → in the Navigator, check `solar_daily` → **Load**.
 
-## Note
+## Notes
 
-- Baza de date (`*.sqlite`) conține date personale și **nu** este urcată în repo (vezi `.gitignore`).
-- Credențialele Garmin se citesc din variabile de mediu, nu sunt stocate în cod.
+- The database (`*.sqlite`) holds personal data and is **not** committed to the repo (see `.gitignore`).
+- Garmin credentials are read from environment variables, never stored in code.
