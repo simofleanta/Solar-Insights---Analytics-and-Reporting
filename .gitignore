@@ -8,6 +8,9 @@ venv/
 .env
 *.token
 
+# Date generate local (se creeaza cu gold_to_sqlite.py)
+solar-grid/solar_grid.db
+
 # IDE
 .vscode/
 .idea/
