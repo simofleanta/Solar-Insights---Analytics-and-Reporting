@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+.hero-glow {
+  background: radial-gradient(ellipse 70% 40% at 50% -10%, rgba(76,196,6,0.09) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.card-glass {
+  background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: border-color 0.3s ease;
+}
+
+.card-glass:hover {
+  border-color: rgba(255,255,255,0.18);
+}
+
+.fade-card {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+
+.fade-card.fade-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
